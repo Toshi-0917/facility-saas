@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./docker/app
+    container_name: facility_app
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-node-modules:/var/www/html/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    restart: unless-stopped
+    env_file:
+      - ./docker/env/app.env
+
+  web:
+    image: nginx:1.28
+    container_name: facility_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    container_name: facility_db
+    env_file:
+      - ./docker/env/db.env
+    ports:
+      - "54321:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U facility -d facility"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cache:
+    image: valkey/valkey:8.1
+    container_name: facility_cache
+    ports:
+      - "6379:6379"
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  app-vendor:
+  app-node-modules:
