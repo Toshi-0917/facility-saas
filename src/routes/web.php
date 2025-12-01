@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SystemStatusController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,3 +26,5 @@ Route::get('/cache-demo', function () {
         'note' => '同じ値が10秒間キャッシュされます',
     ]);
 });
+
+Route::get('/system-status', SystemStatusController::class);
