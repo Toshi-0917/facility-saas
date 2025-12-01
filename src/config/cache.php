@@ -114,4 +114,16 @@ return [
 
     'prefix' => env('CACHE_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-cache-'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Encryption
+    |--------------------------------------------------------------------------
+    |
+    | Whether to encrypt cache values. Set to false to see readable cache keys
+    | for development purposes.
+    |
+    */
+
+    'encrypt' => false,
+
 ];
