@@ -22,7 +22,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
-
-RUN usermod -u 1000 www-data && groupmod -g 1000 www-data
+RUN usermod -u 1000 www-data && groupmod -g 1000 www-data \
+    && mkdir -p /var/www \
+    && chown -R www-data:www-data /var/www
 USER www-data
+WORKDIR /var/www/html
