@@ -1,30 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SystemStatusController;
+use Inertia\Inertia;
 
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/cache-demo', function () {
-    // キャッシュキー：どのデータを「覚えるか」の名前
-    $key = 'demo_random_string';
-
-    // Cache::remember(キー, 有効期限, データ生成処理)
-    $value = Cache::remember($key, now()->addSeconds(10), function () {
-        // 本来は「重いクエリ」「外部API」などをここで実行する想定
-        // 今回はわかりやすく 2秒待ってランダム文字列を返す
-        sleep(2);
-        return Str::random(10);
-    });
-
-    return response()->json([
-        'cached_value' => $value,
-        'note' => '同じ値が10秒間キャッシュされます',
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
     ]);
 });
 
-Route::get('/system-status', SystemStatusController::class);
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
